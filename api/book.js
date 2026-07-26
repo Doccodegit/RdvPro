@@ -49,7 +49,7 @@ async function sendEmail(summary, details) {
     },
     body: JSON.stringify({
       from: RESEND_FROM,
-      to: [NOTIFY_EMAIL_TO],
+      to: NOTIFY_EMAIL_TO.split(',').map(e => e.trim()),
       subject: `Nouveau rendez-vous — ${details.firstName} ${details.lastName}`,
       text: summary,
     }),
