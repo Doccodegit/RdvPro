@@ -62,16 +62,22 @@ async function sendTelegram(summary) {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) throw new Error('Telegram non configuré');
 
-  const resp = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: `📅 Nouveau RDV\n${summary}`,
-    }),
-  });
+  const chatIds = TELEGRAM_CHAT_ID.split(',').map(id => id.trim());
 
-  if (!resp.ok) throw new Error(`Telegram HTTP ${resp.status}: ${await resp.text()}`);
+  const responses = await Promise.all(chatIds.map(chat_id =>
+    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id,
+        text: `📅 Nouveau RDV\n${summary}`,
+      }),
+    })
+  ));
+
+  for (const resp of responses) {
+    if (!resp.ok) throw new Error(`Telegram HTTP ${resp.status}: ${await resp.text()}`);
+  }
 }
 
 async function sendWhatsApp(summary) {
