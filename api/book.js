@@ -15,12 +15,12 @@ module.exports = async function handler(req, res) {
 
   const results = await Promise.allSettled([
     sendEmail(summary, { firstName, lastName, email, phone, topic, date, time }),
-    sendSMS(summary),
+    sendTelegram(summary),
     sendWhatsApp(summary),
   ]);
 
   const failures = results
-    .map((r, i) => ({ r, name: ['email', 'sms', 'whatsapp'][i] }))
+    .map((r, i) => ({ r, name: ['email', 'telegram', 'whatsapp'][i] }))
     .filter(x => x.r.status === 'rejected');
 
   if (failures.length) {
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     ok: true,
     notified: {
       email: results[0].status === 'fulfilled',
-      sms: results[1].status === 'fulfilled',
+      telegram: results[1].status === 'fulfilled',
       whatsapp: results[2].status === 'fulfilled',
     },
   });
@@ -58,38 +58,29 @@ async function sendEmail(summary, details) {
   if (!resp.ok) throw new Error(`Resend HTTP ${resp.status}: ${await resp.text()}`);
 }
 
-async function sendSMS(summary) {
-  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SMS_FROM, NOTIFY_PHONE_TO } = process.env;
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_SMS_FROM || !NOTIFY_PHONE_TO) throw new Error('Twilio SMS non configuré');
+async function sendTelegram(summary) {
+  const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) throw new Error('Telegram non configuré');
 
-  await twilioMessage({ from: TWILIO_SMS_FROM, to: NOTIFY_PHONE_TO, body: `📅 Nouveau RDV\n${summary}` });
+  const resp = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: `📅 Nouveau RDV\n${summary}`,
+    }),
+  });
+
+  if (!resp.ok) throw new Error(`Telegram HTTP ${resp.status}: ${await resp.text()}`);
 }
 
 async function sendWhatsApp(summary) {
-  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM, NOTIFY_WHATSAPP_TO } = process.env;
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_WHATSAPP_FROM || !NOTIFY_WHATSAPP_TO) throw new Error('Twilio WhatsApp non configuré');
+  const { CALLMEBOT_PHONE, CALLMEBOT_APIKEY } = process.env;
+  if (!CALLMEBOT_PHONE || !CALLMEBOT_APIKEY) throw new Error('CallMeBot non configuré');
 
-  await twilioMessage({
-    from: `whatsapp:${TWILIO_WHATSAPP_FROM}`,
-    to: `whatsapp:${NOTIFY_WHATSAPP_TO}`,
-    body: `📅 Nouveau RDV\n${summary}`,
-  });
-}
+  const text = encodeURIComponent(`📅 Nouveau RDV\n${summary}`);
+  const url = `https://api.callmebot.com/whatsapp.php?phone=${CALLMEBOT_PHONE}&text=${text}&apikey=${CALLMEBOT_APIKEY}`;
 
-async function twilioMessage({ from, to, body }) {
-  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = process.env;
-  const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
-
-  const params = new URLSearchParams({ From: from, To: to, Body: body });
-
-  const resp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: params,
-  });
-
-  if (!resp.ok) throw new Error(`Twilio HTTP ${resp.status}: ${await resp.text()}`);
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`CallMeBot HTTP ${resp.status}: ${await resp.text()}`);
 }
