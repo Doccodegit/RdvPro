@@ -128,6 +128,9 @@
   /* Hero */
   .hero {
     padding: 84px 0 70px;
+  }
+
+  .hero-grid {
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
     gap: 56px;
@@ -622,7 +625,8 @@
   }
 
   @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; padding-top: 50px; }
+    .hero { padding-top: 50px; }
+    .hero-grid { grid-template-columns: 1fr; }
     .ticket { grid-template-columns: 1fr; }
     .ticket-divider { border-left: none; border-top: 1px dashed var(--line); }
     .ticket-divider::before { top: -11px; left: 30px; }
@@ -644,7 +648,7 @@
 </header>
 
 <section class="hero">
-  <div class="container" style="display:contents">
+  <div class="container hero-grid">
     <div>
       <span class="eyebrow">Entretien téléphonique · 15 minutes · gratuit</span>
       <h1>On se parle <em>de vive voix</em>, quinze minutes ?</h1>
