@@ -38,24 +38,34 @@ module.exports = async function handler(req, res) {
 }
 
 async function sendEmail(summary, details) {
-  const { RESEND_API_KEY, RESEND_FROM, NOTIFY_EMAIL_TO } = process.env;
-  if (!RESEND_API_KEY || !RESEND_FROM || !NOTIFY_EMAIL_TO) throw new Error('Resend non configuré');
+  const { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY, NOTIFY_EMAIL_TO } = process.env;
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_PRIVATE_KEY || !NOTIFY_EMAIL_TO) {
+    throw new Error('EmailJS non configuré');
+  }
 
-  const resp = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: RESEND_FROM,
-      to: NOTIFY_EMAIL_TO.split(',').map(e => e.trim()),
-      subject: `Nouveau rendez-vous — ${details.firstName} ${details.lastName}`,
-      text: summary,
-    }),
-  });
+  const recipients = NOTIFY_EMAIL_TO.split(',').map(e => e.trim());
 
-  if (!resp.ok) throw new Error(`Resend HTTP ${resp.status}: ${await resp.text()}`);
+  const responses = await Promise.all(recipients.map(to_email =>
+    fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        accessToken: EMAILJS_PRIVATE_KEY,
+        template_params: {
+          to_email,
+          subject: `Nouveau rendez-vous — ${details.firstName} ${details.lastName}`,
+          message: summary,
+        },
+      }),
+    })
+  ));
+
+  for (const resp of responses) {
+    if (!resp.ok) throw new Error(`EmailJS HTTP ${resp.status}: ${await resp.text()}`);
+  }
 }
 
 async function sendTelegram(summary) {
