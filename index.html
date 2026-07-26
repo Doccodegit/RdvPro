@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réservez votre entretien téléphonique</title>
+<style>
+  :root {
+    --ink: #1c2b28;
+    --ink-soft: #4d5f5a;
+    --paper: #f2efe4;
+    --surface: #fffdf8;
+    --line: #dcd5c2;
+    --accent: #0e6b58;
+    --accent-dark: #0a4f40;
+    --accent-tint: #e4efe9;
+    --gold: #c68a2e;
+    --shadow: 0 2px 10px rgba(28, 43, 40, 0.06);
+    --shadow-lg: 0 20px 50px -12px rgba(28, 43, 40, 0.22);
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #eef1ea;
+    --ink-soft: #a8b6ae;
+    --paper: #10201c;
+    --surface: #16261f;
+    --line: #2b3d35;
+    --accent: #3fb494;
+    --accent-dark: #2c8d73;
+    --accent-tint: #1b3129;
+    --gold: #dba852;
+    --shadow: 0 2px 10px rgba(0,0,0,0.3);
+    --shadow-lg: 0 20px 50px -12px rgba(0,0,0,0.55);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #eef1ea;
+      --ink-soft: #a8b6ae;
+      --paper: #10201c;
+      --surface: #16261f;
+      --line: #2b3d35;
+      --accent: #3fb494;
+      --accent-dark: #2c8d73;
+      --accent-tint: #1b3129;
+      --gold: #dba852;
+      --shadow: 0 2px 10px rgba(0,0,0,0.3);
+      --shadow-lg: 0 20px 50px -12px rgba(0,0,0,0.55);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-font-smoothing: antialiased; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.55;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  h1, h2, h3 {
+    font-family: Iowan Old Style, "Palatino Linotype", Georgia, ui-serif, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .mono {
+    font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a { color: inherit; }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--paper);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+  }
+
+  .logo {
+    font-family: Iowan Old Style, "Palatino Linotype", Georgia, ui-serif, serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    letter-spacing: -0.01em;
+  }
+  .logo em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .nav-cta {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 11px 22px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+  /* Hero */
+  .hero {
+    padding: 84px 0 70px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.3rem, 4vw, 3.4rem);
+    line-height: 1.08;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent-dark);
+  }
+
+  .hero p {
+    color: var(--ink-soft);
+    font-size: 1.12rem;
+    max-width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 15px 30px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s, color 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+  .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+  .btn-link {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-link:hover { color: var(--accent-dark); }
+
+  .trust-row {
+    margin-top: 40px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+  }
+  .trust-item { display: flex; align-items: center; gap: 7px; }
+  .trust-item svg { flex-shrink: 0; color: var(--accent); }
+
+  /* Hero waveform visual */
+  .hero-visual {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow-lg);
+    padding: 34px 30px;
+  }
+  .hero-visual-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 26px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .hero-visual-top .live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-dark);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .caller-name { font-family: Iowan Old Style, Georgia, serif; font-size: 1.3rem; margin-bottom: 2px; }
+  .caller-sub { color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 24px; }
+
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 60px;
+    margin-bottom: 24px;
+  }
+  .waveform span {
+    flex: 1;
+    background: var(--accent);
+    opacity: 0.75;
+    border-radius: 2px;
+    animation: wave 1.4s ease-in-out infinite;
+  }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.25); }
+    50% { transform: scaleY(1); }
+  }
+  .call-timer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px dashed var(--line);
+    padding-top: 18px;
+  }
+  .call-timer .time { font-size: 1.6rem; font-weight: 600; }
+  .call-timer .label { font-size: 0.78rem; color: var(--ink-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot, .waveform span { animation: none; }
+  }
+
+  /* Features */
+  .features { padding: 20px 0 76px; }
+
+  .process-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 40px;
+  }
+  .process-head h2 { font-size: 1.5rem; }
+  .process-head span { color: var(--ink-soft); font-size: 0.85rem; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .feature-card {
+    padding: 4px 32px 4px 0;
+    border-left: 1px solid var(--line);
+    padding-left: 28px;
+  }
+  .feature-card:first-child { border-left: none; padding-left: 0; }
+
+  .feature-num {
+    font-family: Iowan Old Style, Georgia, serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-size: 1.08rem;
+    margin-bottom: 9px;
+    font-weight: 600;
+  }
+
+  .feature-card p {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  /* Booking section */
+  .booking { padding: 20px 0 96px; }
+
+  .section-head {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 44px;
+  }
+  .section-head .eyebrow { justify-content: center; display: flex; }
+  .section-head h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); margin-bottom: 10px; }
+  .section-head p { color: var(--ink-soft); }
+
+  .ticket {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow-lg);
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    position: relative;
+  }
+
+  .ticket-tag {
+    position: absolute;
+    top: -13px;
+    left: 36px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+  }
+
+  .ticket-left { padding: 42px 36px; }
+
+  .ticket-divider {
+    position: relative;
+    border-left: 1px dashed var(--line);
+  }
+  .ticket-divider::before,
+  .ticket-divider::after {
+    content: "";
+    position: absolute;
+    left: -11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+  }
+  .ticket-divider::before { top: -11px; }
+  .ticket-divider::after { bottom: -11px; }
+
+  .ticket-right { padding: 42px 36px; }
+
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 26px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .step { display: flex; align-items: center; gap: 8px; }
+  .step.active { color: var(--accent-dark); }
+  .step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+  }
+  .step.active .step-num { background: var(--accent); }
+  .step-sep { width: 18px; height: 1px; background: var(--line); }
+
+  .day-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .day-nav h3 { font-size: 1rem; text-transform: capitalize; font-weight: 600; }
+  .day-nav-btns { display: flex; gap: 8px; }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+  .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .day-picker {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .day-chip {
+    flex: 0 0 auto;
+    width: 54px;
+    padding: 9px 0;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--ink);
+  }
+  .day-chip .dow { display: block; font-size: 0.68rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .day-chip .num { display: block; font-size: 1.05rem; font-weight: 700; margin-top: 3px; font-family: ui-monospace, monospace; }
+  .day-chip:hover { border-color: var(--accent); }
+  .day-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .day-chip.selected .dow { color: rgba(255,255,255,0.8); }
+  .day-chip.disabled { opacity: 0.32; pointer-events: none; }
+
+  .slots-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+  }
+
+  .slot-btn {
+    padding: 10px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: ui-monospace, monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .slot-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+  .slot-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .no-slots {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    padding: 18px 0;
+    text-align: center;
+  }
+
+  .duration-note {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-soft);
+    font-size: 0.83rem;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+
+  .selected-summary {
+    background: var(--accent-tint);
+    border-radius: 4px;
+    padding: 15px 17px;
+    margin-bottom: 22px;
+    font-size: 0.9rem;
+    color: var(--accent-dark);
+    font-weight: 600;
+    display: none;
+  }
+  .selected-summary.show { display: block; }
+
+  .form-group { margin-bottom: 15px; }
+  .form-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 7px;
+    color: var(--ink-soft);
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.96rem;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .submit-btn:hover:not(:disabled) { background: var(--accent-dark); transform: translateY(-1px); }
+  .submit-btn:disabled { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+
+  .privacy-note {
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-top: 12px;
+  }
+
+  .confirmation { display: none; text-align: center; padding: 44px 10px; }
+  .confirmation.show { display: block; }
+  .confirmation .check-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--accent-tint);
+    color: var(--accent-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .confirmation h3 { font-size: 1.25rem; margin-bottom: 8px; }
+  .confirmation p { color: var(--ink-soft); margin-bottom: 4px; }
+  .confirmation .confirm-detail {
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+    font-weight: 600;
+    font-family: ui-monospace, monospace;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 26px 0;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding-top: 50px; }
+    .ticket { grid-template-columns: 1fr; }
+    .ticket-divider { border-left: none; border-top: 1px dashed var(--line); }
+    .ticket-divider::before { top: -11px; left: 30px; }
+    .ticket-divider::after { display: none; }
+    .features-grid { grid-template-columns: 1fr; gap: 24px; }
+    .feature-card { border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 20px; }
+    .feature-card:first-child { border-top: none; padding-top: 0; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">Rdv<em>Pro</em></div>
+    <button class="nav-cta" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Réserver un créneau</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container" style="display:contents">
+    <div>
+      <span class="eyebrow">Entretien téléphonique · 15 minutes · gratuit</span>
+      <h1>On se parle <em>de vive voix</em>, quinze minutes ?</h1>
+      <p>Choisissez le créneau qui vous convient. Je vous rappelle à l'heure pile, sans détour, pour comprendre votre besoin et voir si l'on peut avancer ensemble.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Choisir mon créneau</button>
+        <a href="#process" class="btn-link">
+          Comment ça se passe
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Sans carte bancaire
+        </div>
+        <div class="trust-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Confirmation immédiate
+        </div>
+        <div class="trust-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          Sans engagement
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual-top">
+        <span class="live"><span class="live-dot"></span>Appel en cours</span>
+        <span class="mono">15:00</span>
+      </div>
+      <div class="caller-name">Vous &amp; moi</div>
+      <div class="caller-sub">Entretien de découverte</div>
+      <div class="waveform">
+        <span style="animation-delay:0s"></span><span style="animation-delay:0.1s"></span><span style="animation-delay:0.2s"></span>
+        <span style="animation-delay:0.3s"></span><span style="animation-delay:0.15s"></span><span style="animation-delay:0.25s"></span>
+        <span style="animation-delay:0.05s"></span><span style="animation-delay:0.35s"></span><span style="animation-delay:0.2s"></span>
+        <span style="animation-delay:0.1s"></span><span style="animation-delay:0.3s"></span><span style="animation-delay:0s"></span>
+        <span style="animation-delay:0.4s"></span><span style="animation-delay:0.12s"></span>
+      </div>
+      <div class="call-timer">
+        <div>
+          <div class="time mono">14:52</div>
+          <div class="label">restant sur 15:00</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label">Ligne directe</div>
+          <div class="label">réseau HD</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="process">
+  <div class="container">
+    <div class="process-head">
+      <h2>Le déroulé</h2>
+      <span>Trois étapes, deux minutes</span>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-num">I.</span>
+        <h3>Choisissez un créneau</h3>
+        <p>Parcourez les jours ouvrés et sélectionnez l'horaire qui vous arrange, à jour en temps réel.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-num">II.</span>
+        <h3>Renseignez vos coordonnées</h3>
+        <p>Nom, numéro et, si vous le souhaitez, un mot sur le sujet à aborder pour préparer l'échange.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-num">III.</span>
+        <h3>Décrochez à l'heure dite</h3>
+        <p>Confirmation immédiate par e-mail, puis un appel à l'heure convenue — pas une minute de plus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="booking" id="booking">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Disponibilités en temps réel</span>
+      <h2>Réservez votre entretien téléphonique</h2>
+      <p>Sélectionnez un jour, un horaire, puis confirmez vos coordonnées.</p>
+    </div>
+
+    <div class="ticket">
+      <span class="ticket-tag">Billet d'appel</span>
+      <div class="ticket-left">
+        <div class="steps">
+          <div class="step active" id="step1"><span class="step-num">1</span> Créneau</div>
+          <div class="step-sep"></div>
+          <div class="step" id="step2"><span class="step-num">2</span> Coordonnées</div>
+        </div>
+
+        <div class="day-nav">
+          <h3 id="monthLabel">Juillet 2026</h3>
+          <div class="day-nav-btns">
+            <button class="icon-btn" id="prevWeek" aria-label="Semaine précédente">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="icon-btn" id="nextWeek" aria-label="Semaine suivante">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="day-picker" id="dayPicker"></div>
+
+        <div class="slots-label">Créneaux disponibles</div>
+        <div class="slots-grid" id="slotsGrid"></div>
+
+        <div class="duration-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Appel téléphonique de 15 minutes
+        </div>
+      </div>
+
+      <div class="ticket-divider"></div>
+
+      <div class="ticket-right">
+        <div id="formView">
+          <div class="selected-summary" id="selectedSummary"></div>
+
+          <form id="bookingForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">Prénom</label>
+                <input type="text" id="firstName" required>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Nom</label>
+                <input type="text" id="lastName" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Numéro de téléphone</label>
+              <input type="tel" id="phone" required placeholder="06 12 34 56 78">
+            </div>
+            <div class="form-group">
+              <label for="topic">Sujet (optionnel)</label>
+              <textarea id="topic" rows="3" placeholder="Décrivez brièvement votre besoin..."></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>Sélectionnez un créneau</button>
+            <p class="privacy-note">Vos informations ne servent qu'à organiser cet appel.</p>
+          </form>
+        </div>
+
+        <div class="confirmation" id="confirmationView">
+          <div class="check-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h3>Rendez-vous confirmé</h3>
+          <p>Un e-mail de confirmation vous a été envoyé.</p>
+          <div class="confirm-detail" id="confirmDetail"></div>
+          <button class="btn btn-primary" onclick="resetBooking()">Réserver un autre créneau</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    &copy; <span id="year"></span> RdvPro — Prise de rendez-vous téléphonique
+  </div>
+</footer>
+
+<script>
+  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const DOW = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const HOURS = ['09:00','09:30','10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let weekOffset = 0;
+  let selectedDate = null;
+  let selectedTime = null;
+
+  function isSlotAvailable(dateStr, time) {
+    let hash = 0;
+    const str = dateStr + time;
+    for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+    return hash % 3 !== 0;
+  }
+
+  function fmtDateKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function isWeekend(d) {
+    const day = d.getDay();
+    return day === 0 || day === 6;
+  }
+
+  function renderDayPicker() {
+    const picker = document.getElementById('dayPicker');
+    picker.innerHTML = '';
+    const base = new Date(today);
+    base.setDate(base.getDate() + weekOffset * 7);
+
+    let monthLabelSet = false;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      const key = fmtDateKey(d);
+      const disabled = isWeekend(d);
+
+      if (!monthLabelSet) {
+        document.getElementById('monthLabel').textContent = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+        monthLabelSet = true;
+      }
+
+      const chip = document.createElement('div');
+      chip.className = 'day-chip' + (disabled ? ' disabled' : '') + (selectedDate === key ? ' selected' : '');
+      chip.innerHTML = `<span class="dow">${DOW[d.getDay()]}</span><span class="num">${d.getDate()}</span>`;
+      if (!disabled) {
+        chip.addEventListener('click', () => {
+          selectedDate = key;
+          selectedTime = null;
+          renderDayPicker();
+          renderSlots();
+          updateSummary();
+        });
+      }
+      picker.appendChild(chip);
+    }
+
+    document.getElementById('prevWeek').disabled = weekOffset === 0;
+  }
+
+  function renderSlots() {
+    const grid = document.getElementById('slotsGrid');
+    grid.innerHTML = '';
+
+    if (!selectedDate) {
+      grid.innerHTML = '<div class="no-slots" style="grid-column:1/-1">Sélectionnez d\'abord un jour</div>';
+      return;
+    }
+
+    const available = HOURS.filter(h => isSlotAvailable(selectedDate, h));
+
+    if (available.length === 0) {
+      grid.innerHTML = '<div class="no-slots" style="grid-column:1/-1">Aucun créneau disponible ce jour-là</div>';
+      return;
+    }
+
+    available.forEach(h => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-btn' + (selectedTime === h ? ' selected' : '');
+      btn.textContent = h;
+      btn.addEventListener('click', () => {
+        selectedTime = h;
+        renderSlots();
+        updateSummary();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateSummary() {
+    const summary = document.getElementById('selectedSummary');
+    const submitBtn = document.getElementById('submitBtn');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+
+    if (selectedDate && selectedTime) {
+      const d = new Date(selectedDate + 'T00:00:00');
+      const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      summary.textContent = `Créneau sélectionné : ${label.charAt(0).toUpperCase() + label.slice(1)} à ${selectedTime}`;
+      summary.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Confirmer le rendez-vous';
+      step1.classList.remove('active');
+      step2.classList.add('active');
+    } else {
+      summary.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sélectionnez un créneau';
+      step1.classList.add('active');
+      step2.classList.remove('active');
+    }
+  }
+
+  document.getElementById('prevWeek').addEventListener('click', () => {
+    if (weekOffset > 0) { weekOffset--; renderDayPicker(); }
+  });
+  document.getElementById('nextWeek').addEventListener('click', () => {
+    weekOffset++;
+    renderDayPicker();
+  });
+
+  document.getElementById('bookingForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!selectedDate || !selectedTime) return;
+
+    const d = new Date(selectedDate + 'T00:00:00');
+    const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('confirmDetail').textContent = `${label.charAt(0).toUpperCase() + label.slice(1)} à ${selectedTime}`;
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('confirmationView').classList.add('show');
+  });
+
+  function resetBooking() {
+    selectedDate = null;
+    selectedTime = null;
+    document.getElementById('bookingForm').reset();
+    document.getElementById('formView').style.display = 'block';
+    document.getElementById('confirmationView').classList.remove('show');
+    renderDayPicker();
+    renderSlots();
+    updateSummary();
+  }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  renderDayPicker();
+  renderSlots();
+  updateSummary();
+</script>
+
+</body>
+</html>
