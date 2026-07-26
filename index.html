@@ -951,9 +951,37 @@
     renderDayPicker();
   });
 
-  document.getElementById('bookingForm').addEventListener('submit', (e) => {
+  document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!selectedDate || !selectedTime) return;
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi en cours...';
+
+    const payload = {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      topic: document.getElementById('topic').value,
+      date: selectedDate,
+      time: selectedTime,
+    };
+
+    try {
+      const resp = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error('Échec de la réservation');
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Confirmer le rendez-vous';
+      alert("Une erreur est survenue lors de l'envoi de votre réservation. Merci de réessayer.");
+      return;
+    }
 
     const d = new Date(selectedDate + 'T00:00:00');
     const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
